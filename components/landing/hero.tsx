@@ -3,47 +3,41 @@ import Link from 'next/link'
 
 export function Hero() {
   return (
-    <section className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end px-6 pb-16 pt-24 lg:px-14 lg:pb-20">
-      <div className="flex max-w-xl flex-col gap-6">
-        <h1 className="text-balance font-display text-5xl font-medium leading-[1.08] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+    <section className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center gap-12 px-6 py-16 lg:flex-row lg:justify-between lg:gap-12 lg:px-14 lg:py-8">
+      <div className="flex max-w-2xl flex-col lg:flex-1">
+        <h1 className="text-balance font-display text-5xl font-medium leading-[1.05] tracking-tight text-foreground sm:text-6xl xl:text-7xl">
           Upload once, apply everywhere
         </h1>
-        <p className="max-w-md text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+        <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-foreground/85 sm:text-xl">
           Applot finds legit roles on trusted job boards, tailors every application to your CV, and
           sends up to 100 a day while you prepare for interviews.
         </p>
-        <div className="flex flex-wrap items-center gap-4 pt-2">
+        <div className="mt-10 flex flex-wrap items-center gap-4">
           <Link
             href="/sign-up"
-            className="inline-flex h-14 min-w-36 items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#e8007a] px-8 text-sm font-semibold text-primary-foreground shadow-[0_8px_30px_-6px] shadow-primary/60 transition-transform hover:scale-[1.02]"
+            className="inline-flex h-14 min-w-40 items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#e8007a] px-8 text-base font-semibold text-primary-foreground shadow-[0_8px_30px_-6px] shadow-primary/60 transition-transform hover:scale-[1.02]"
           >
             Get started
           </Link>
           <Link
             href="#how-it-works"
-            className="inline-flex h-14 min-w-36 items-center justify-center rounded-full bg-foreground px-8 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+            className="inline-flex h-14 min-w-40 items-center justify-center rounded-full bg-foreground px-8 text-base font-semibold text-background transition-opacity hover:opacity-90"
           >
             Learn more
           </Link>
         </div>
       </div>
-    </section>
-  )
-}
 
-export function HeroBackdrop() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <Image
-        src="/images/hero-robot.png"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-[70%_center] opacity-60 md:opacity-100"
-      />
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent md:via-background/40" />
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
-    </div>
+      <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-3xl border border-border shadow-2xl shadow-primary/10 sm:max-w-sm lg:w-[30%] lg:max-w-md">
+        <Image
+          src="/images/hero-robot.png"
+          alt="Applot's AI agent robot standing on a glowing platform"
+          fill
+          priority
+          sizes="(min-width: 1024px) 30vw, 384px"
+          className="object-cover object-[70%_center]"
+        />
+      </div>
+    </section>
   )
 }
