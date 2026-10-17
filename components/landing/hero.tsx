@@ -34,17 +34,20 @@ export function Hero() {
 export function HeroBackground() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-      <Image
-        src="/images/hero-workspace.png"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-[72%_center] lg:object-right"
-      />
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/10 lg:via-background/70 lg:to-transparent" />
-      <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-background via-background/70 to-transparent lg:w-3/5" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
+      <div className="absolute inset-0 md:left-auto md:w-[62%]">
+        <Image
+          src="/images/hero-robot-bg.png"
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 768px) 62vw, 100vw"
+          className="object-cover object-[68%_center] opacity-40 md:object-[75%_center] md:opacity-100"
+        />
+        <div className="absolute inset-0 bg-background/40 md:hidden" />
+        <div className="absolute inset-y-0 left-0 hidden w-2/5 bg-gradient-to-r from-background via-background/70 to-transparent md:block" />
+        <div className="absolute inset-y-0 right-0 w-1/5 bg-gradient-to-l from-background via-background/50 to-transparent" />
+      </div>
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" />
       <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/80 to-transparent" />
     </div>
   )
