@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export function Hero() {
   return (
-    <section className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center gap-12 px-6 py-16 lg:flex-row lg:justify-between lg:gap-12 lg:px-14 lg:py-8">
+    <section className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-6 py-16 lg:px-14 lg:py-8">
       <div className="flex max-w-2xl flex-col lg:flex-1">
         <h1 className="text-balance font-display text-5xl font-medium leading-[1.05] tracking-tight text-foreground sm:text-6xl xl:text-7xl">
           Upload once, apply everywhere
@@ -27,17 +27,25 @@ export function Hero() {
           </Link>
         </div>
       </div>
-
-      <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-3xl border border-border shadow-2xl shadow-primary/10 sm:max-w-sm lg:w-[30%] lg:max-w-md">
-        <Image
-          src="/images/hero-robot.png"
-          alt="Applot's AI agent robot standing on a glowing platform"
-          fill
-          priority
-          sizes="(min-width: 1024px) 30vw, 384px"
-          className="object-cover object-[70%_center]"
-        />
-      </div>
     </section>
+  )
+}
+
+export function HeroBackground() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <Image
+        src="/images/hero-workspace.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-[72%_center] lg:object-right"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/10 lg:via-background/70 lg:to-transparent" />
+      <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-background via-background/70 to-transparent lg:w-3/5" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/80 to-transparent" />
+    </div>
   )
 }
