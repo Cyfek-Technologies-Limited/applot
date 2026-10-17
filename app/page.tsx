@@ -1,5 +1,5 @@
 import { About, HowItWorks } from '@/components/landing/how-it-works'
-import { Hero, HeroBackground } from '@/components/landing/hero'
+import { Hero } from '@/components/landing/hero'
 import { SiteHeader } from '@/components/landing/site-header'
 import { getSession } from '@/lib/auth'
 
@@ -8,7 +8,6 @@ export default async function HomePage() {
   return (
     <main className="min-h-dvh bg-background">
       <div className="relative flex min-h-dvh flex-col">
-        <HeroBackground />
         <SiteHeader signedIn={Boolean(session?.user)} />
         <Hero />
       </div>
