@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Better Auth tables ----------
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ---------- Applot tables ----------
+
+model Profile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  fullName            String   @default("")
+  email               String   @default("")
+  phone               String   @default("")
+  location            String   @default("")
+  headline            String   @default("")
+  summary             String   @default("")
+  linkedinUrl         String   @default("")
+  portfolioUrl        String   @default("")
+  yearsExperience     Int      @default(0)
+  workAuthorization   String   @default("")
+  requiresSponsorship Boolean  @default(false)
+  willingToRelocate   Boolean  @default(false)
+  salaryExpectation   String   @default("")
+  noticePeriod        String   @default("")
+  skills              String[] @default([])
+  targetRoles         String[] @default([])
+  preferredLocations  String[] @default([])
+  remoteOnly          Boolean  @default(true)
+  dailyLimit          Int      @default(25)
+  autopilot           Boolean  @default(false)
+  resumeFileName      String   @default("")
+  resumeText          String   @default("")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("profile")
+}
+
+enum ApplicationStatus {
+  PREPARED
+  APPLIED
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+enum AppliedBy {
+  AGENT
+  MANUAL
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  userId      String
+  externalId  String
+  source      String
+  title       String
+  company     String
+  location    String            @default("")
+  url         String
+  salary      String            @default("")
+  matchScore  Int               @default(0)
+  matchReason String            @default("")
+  coverLetter String            @default("")
+  notes       String            @default("")
+  status      ApplicationStatus @default(PREPARED)
+  appliedBy   AppliedBy         @default(AGENT)
+  appliedAt   DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([userId, externalId])
+  @@index([userId, createdAt])
+  @@map("application")
+}
+
+model AgentRun {
+  id         String   @id @default(cuid())
+  userId     String
+  jobsFound  Int      @default(0)
+  jobsQueued Int      @default(0)
+  status     String   @default("success")
+  message    String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("agent_run")
+}
