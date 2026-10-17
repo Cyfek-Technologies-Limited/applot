@@ -28,14 +28,14 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-3xl border border-border shadow-2xl shadow-primary/10 sm:max-w-sm lg:w-[30%] lg:max-w-md">
+      <div className="relative aspect-[4/3] w-full max-w-md overflow-hidden rounded-3xl border border-border shadow-2xl shadow-primary/10 sm:max-w-lg lg:w-[42%] lg:max-w-xl">
         <Image
-          src="/images/hero-robot.png"
-          alt="Applot's AI agent robot standing on a glowing platform"
+          src="/images/hero-orbs.png"
+          alt="Abstract glass fins and softly lit spheres on a cool blue gradient"
           fill
           priority
-          sizes="(min-width: 1024px) 30vw, 384px"
-          className="object-cover object-[70%_center]"
+          sizes="(min-width: 1024px) 42vw, 512px"
+          className="object-cover object-center"
         />
       </div>
     </section>
