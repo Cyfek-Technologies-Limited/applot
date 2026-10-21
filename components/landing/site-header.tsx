@@ -1,11 +1,11 @@
-import Link from 'next/link'
-import { Logo } from '@/components/logo'
+import Link from "next/link";
+import { Logo } from "@/components/logo";
 
 const links = [
-  { href: '/', label: 'Home', active: true },
-  { href: '#how-it-works', label: 'How it works' },
-  { href: '#about', label: 'About' },
-]
+  { href: "/", label: "Home", active: true },
+  { href: "#how-it-works", label: "How it works" },
+  { href: "#about", label: "About" },
+];
 
 export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   return (
@@ -17,11 +17,11 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
             <Link
               key={link.label}
               href={link.href}
-              aria-current={link.active ? 'page' : undefined}
+              aria-current={link.active ? "page" : undefined}
               className={
                 link.active
-                  ? 'rounded-full border border-foreground/15 bg-foreground/10 px-5 py-2 text-sm font-semibold text-foreground backdrop-blur'
-                  : 'rounded-full px-5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                  ? "rounded-full border border-foreground/15 bg-foreground/10 px-5 py-2 text-sm font-semibold text-foreground backdrop-blur"
+                  : "rounded-full px-5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               }
             >
               {link.label}
@@ -47,7 +47,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
             </Link>
             <Link
               href="/sign-up"
-              className="rounded-full bg-brand-soft/80 px-6 py-2.5 text-sm font-semibold text-brand-soft-foreground backdrop-blur transition-colors hover:bg-brand-soft"
+              className="rounded-full bg-gradient-to-r from-primary to-[#e8007a] px-6 py-2.5 text-sm font-semibold text-brand-soft-foreground backdrop-blur transition-colors hover:bg-brand-soft"
             >
               Join us
             </Link>
@@ -55,5 +55,5 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
         )}
       </div>
     </header>
-  )
+  );
 }
