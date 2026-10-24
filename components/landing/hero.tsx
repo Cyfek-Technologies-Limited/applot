@@ -43,7 +43,7 @@ export function HeroBackdrop() {
         alt=""
         fill
         priority
-        sizes="100vw"
+        sizes="101vw"
         className="object-cover object-[70%_center] opacity-45 md:opacity-60"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/40 md:via-background/75 md:to-background/35" />
