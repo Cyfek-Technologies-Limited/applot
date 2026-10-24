@@ -11,11 +11,24 @@ export const auth = betterAuth({
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
-        : process.env.V0_RUNTIME_URL),
+        : process.env.V0_RUNTIME_URL ??
+          (process.env.NODE_ENV === 'development'
+            ? 'http://localhost:3000'
+            : undefined)),
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
   },
+  ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? {
+        socialProviders: {
+          google: {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          },
+        },
+      }
+    : {}),
   trustedOrigins: [
     ...(process.env.NODE_ENV === 'development'
       ? [

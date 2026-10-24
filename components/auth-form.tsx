@@ -1,42 +1,70 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { Logo } from '@/components/logo'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { authClient } from '@/lib/auth-client'
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
 
-export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
-  const router = useRouter()
-  const [error, setError] = useState('')
-  const [pending, setPending] = useState(false)
-  const isSignUp = mode === 'sign-up'
+export function AuthForm({
+  mode,
+  googleEnabled,
+}: {
+  mode: "sign-in" | "sign-up";
+  googleEnabled: boolean;
+}) {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const isSignUp = mode === "sign-up";
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError('')
-    setPending(true)
-    const form = new FormData(e.currentTarget)
-    const email = String(form.get('email'))
-    const password = String(form.get('password'))
+    e.preventDefault();
+    setError("");
+    setPending(true);
+    const form = new FormData(e.currentTarget);
+    const email = String(form.get("email"));
+    const password = String(form.get("password"));
     const { error } = isSignUp
-      ? await authClient.signUp.email({ email, password, name: String(form.get('name')) })
-      : await authClient.signIn.email({ email, password })
-    setPending(false)
+      ? await authClient.signUp.email({
+          email,
+          password,
+          name: String(form.get("name")),
+        })
+      : await authClient.signIn.email({ email, password });
+    setPending(false);
     if (error) {
-      console.error('[applot] auth error', error)
+      console.error("[applot] auth error", error);
       setError(
         isSignUp
-          ? 'Could not create your account. Check your details and try again.'
-          : 'Invalid email or password.',
-      )
-      return
+          ? "Could not create your account. Check your details and try again."
+          : "Invalid email or password."
+      );
+      return;
     }
-    router.push(isSignUp ? '/dashboard/profile' : '/dashboard')
-    router.refresh()
+    router.push(isSignUp ? "/dashboard/profile" : "/dashboard");
+    router.refresh();
+  }
+
+  async function onGoogleSignIn() {
+    setError("");
+    setPending(true);
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: isSignUp ? "/dashboard/profile" : "/dashboard",
+      });
+      if (error) {
+        setError("Could not sign in with Google. Please try again.");
+        setPending(false);
+      }
+    } catch {
+      setError("Could not sign in with Google. Please try again.");
+      setPending(false);
+    }
   }
 
   return (
@@ -45,24 +73,58 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
         <Logo />
         <div className="flex flex-col gap-2">
           <h1 className="font-display text-3xl font-medium tracking-tight">
-            {isSignUp ? 'Create your account' : 'Welcome back'}
+            {isSignUp ? "Create your account" : "Welcome back"}
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground">
             {isSignUp
-              ? 'Upload your CV once and let the agent do the applying.'
-              : 'Sign in to check on your applications.'}
+              ? "Upload your CV once and let the agent do the applying."
+              : "Sign in to check on your applications."}
           </p>
         </div>
+        {googleEnabled && (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={onGoogleSignIn}
+              className="h-11 rounded-full"
+            >
+              <span aria-hidden="true" className="mr-2 font-semibold text-base">
+                G
+              </span>
+              Continue with Google
+            </Button>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="h-px flex-1 bg-border" />
+              or continue with email
+              <span className="h-px flex-1 bg-border" />
+            </div>
+          </>
+        )}
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           {isSignUp && (
             <div className="flex flex-col gap-2">
               <Label htmlFor="name">Full name</Label>
-              <Input id="name" name="name" required autoComplete="name" className="h-11" />
+              <Input
+                id="name"
+                name="name"
+                required
+                autoComplete="name"
+                className="h-11"
+              />
             </div>
           )}
           <div className="flex flex-col gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required autoComplete="email" className="h-11" />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className="h-11"
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="password">Password</Label>
@@ -72,7 +134,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
               type="password"
               required
               minLength={8}
-              autoComplete={isSignUp ? 'new-password' : 'current-password'}
+              autoComplete={isSignUp ? "new-password" : "current-password"}
               className="h-11"
             />
           </div>
@@ -81,20 +143,24 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
               {error}
             </p>
           )}
-          <Button type="submit" disabled={pending} className="mt-2 h-11 rounded-full">
-            {pending ? 'Please wait…' : isSignUp ? 'Create account' : 'Sign in'}
+          <Button
+            type="submit"
+            disabled={pending}
+            className="mt-2 h-11 rounded-full"
+          >
+            {pending ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}
           </Button>
         </form>
         <p className="text-sm text-muted-foreground">
-          {isSignUp ? 'Already have an account? ' : 'New to Applot? '}
+          {isSignUp ? "Already have an account? " : "New to Applot? "}
           <Link
-            href={isSignUp ? '/sign-in' : '/sign-up'}
+            href={isSignUp ? "/sign-in" : "/sign-up"}
             className="font-medium text-foreground underline underline-offset-4"
           >
-            {isSignUp ? 'Sign in' : 'Create an account'}
+            {isSignUp ? "Sign in" : "Create an account"}
           </Link>
         </p>
       </div>
     </main>
-  )
+  );
 }

@@ -10,6 +10,22 @@ This repository is linked to a [v0](https://v0.app) project. You can continue de
 
 ## Getting Started
 
+### Google sign-in
+
+Create a **Web application** OAuth client in Google Cloud Console and set these
+server-side environment variables in `.env` (and in your deployment):
+
+```env
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+```
+
+Add `http://localhost:3000/api/auth/callback/google` to the OAuth client's
+authorized redirect URIs for local development. For deployment, add
+`<BETTER_AUTH_URL>/api/auth/callback/google` as an authorized redirect URI and
+set `BETTER_AUTH_URL` to your app's public origin. The Google option appears on
+the sign-up and sign-in pages once both credentials are configured.
+
 First, run the development server:
 
 ```bash

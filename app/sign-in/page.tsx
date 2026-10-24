@@ -7,5 +7,10 @@ export const metadata = { title: 'Sign in — Applot' }
 export default async function SignInPage() {
   const session = await getSession()
   if (session?.user) redirect('/dashboard')
-  return <AuthForm mode="sign-in" />
+  return (
+    <AuthForm
+      mode="sign-in"
+      googleEnabled={Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)}
+    />
+  )
 }
