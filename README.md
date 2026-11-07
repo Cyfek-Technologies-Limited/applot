@@ -10,6 +10,23 @@ This repository is linked to a [v0](https://v0.app) project. You can continue de
 
 ## Getting Started
 
+Copy `.env.example` to `.env.local`, set `DATABASE_URL` to a running PostgreSQL
+database, and set `BETTER_AUTH_SECRET` to a random secret of at least 32 characters.
+Generate a secret with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+Keep credentials in `.env.local`, which is ignored by Git.
+
+Initialize a new development database and generate the client:
+
+```bash
+npx prisma db push
+npx prisma generate
+```
+
+Restart Next.js after changing environment variables. Local auth supports the
+port selected by Next.js (including 3001). Leave `BETTER_AUTH_URL` empty locally,
+or set it to the exact origin you use. Google OAuth redirect URIs must use that
+same port. In production, set `BETTER_AUTH_URL` to the public HTTPS origin.
+
 ### Google sign-in
 
 Create a **Web application** OAuth client in Google Cloud Console and set these

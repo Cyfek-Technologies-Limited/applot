@@ -6,14 +6,17 @@ import { prisma } from '@/lib/db'
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
   baseURL:
-    process.env.BETTER_AUTH_URL ??
+    process.env.BETTER_AUTH_URL?.trim() ||
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
         : process.env.V0_RUNTIME_URL ??
           (process.env.NODE_ENV === 'development'
-            ? 'http://localhost:3000'
+            ? {
+                allowedHosts: ['localhost:*', '127.0.0.1:*'],
+                fallback: 'http://localhost:3000',
+              }
             : undefined)),
   emailAndPassword: {
     enabled: true,
@@ -54,7 +57,7 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
   },
-  ...(process.env.NODE_ENV === 'development'
+  ...(process.env.NODE_ENV === 'development' && process.env.V0_RUNTIME_URL
     ? {
         advanced: {
           // Required by the cross-site v0 preview iframe. Without these
