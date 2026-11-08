@@ -6,26 +6,27 @@ import { requireUserId } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
 export const metadata = { title: 'Dashboard — Applot' }
+export const maxDuration = 300
 
 export default async function DashboardPage() {
   const userId = await requireUserId()
   const startOfDay = new Date()
-  startOfDay.setHours(0, 0, 0, 0)
+  startOfDay.setUTCHours(0, 0, 0, 0)
 
   const [profile, applications, lastRun, todayCount] = await Promise.all([
     prisma.profile.findUnique({ where: { userId } }),
     prisma.application.findMany({
-      where: { userId },
+      where: { userId, archivedAt: null },
       orderBy: { createdAt: 'desc' },
       take: 200,
     }),
     prisma.agentRun.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' } }),
     prisma.application.count({
-      where: { userId, appliedBy: 'AGENT', createdAt: { gte: startOfDay } },
+      where: { userId, appliedBy: 'AGENT', submissionAttemptedAt: { gte: startOfDay } },
     }),
   ])
 
-  const ready = Boolean(profile?.targetRoles.length && profile.resumeText)
+  const ready = Boolean(profile?.targetRoles.length && profile.resumeData && profile.location && profile.fullName && profile.email)
   const count = (s: string) => applications.filter((a) => a.status === s).length
   const stats = [
     { label: 'Total tracked', value: applications.length },
@@ -60,7 +61,7 @@ export default async function DashboardPage() {
           <div className="flex flex-col gap-1">
             <p className="font-semibold">Finish your profile to start the agent</p>
             <p className="text-sm text-muted-foreground">
-              Upload your CV and add at least one target role.
+              Upload your original CV and save your name, email, current location, and at least one target role.
             </p>
           </div>
           <Link
@@ -96,6 +97,9 @@ export default async function DashboardPage() {
           status: a.status,
           appliedBy: a.appliedBy,
           createdAt: a.createdAt.toISOString(),
+          submissionStatus: a.submissionStatus,
+          submissionMessage: a.submissionMessage,
+          submissionQuestions: Array.isArray(a.submissionQuestions) ? a.submissionQuestions.filter((q): q is string => typeof q === 'string') : [],
         }))}
       />
     </div>

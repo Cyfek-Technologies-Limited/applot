@@ -51,6 +51,10 @@ export type ApplicationMinAggregateOutputType = {
   status: $Enums.ApplicationStatus | null
   appliedBy: $Enums.AppliedBy | null
   appliedAt: Date | null
+  submissionStatus: string | null
+  submissionMessage: string | null
+  submissionAttemptedAt: Date | null
+  archivedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +76,10 @@ export type ApplicationMaxAggregateOutputType = {
   status: $Enums.ApplicationStatus | null
   appliedBy: $Enums.AppliedBy | null
   appliedAt: Date | null
+  submissionStatus: string | null
+  submissionMessage: string | null
+  submissionAttemptedAt: Date | null
+  archivedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -93,6 +101,13 @@ export type ApplicationCountAggregateOutputType = {
   status: number
   appliedBy: number
   appliedAt: number
+  submissionStatus: number
+  submissionMessage: number
+  submissionAttemptedAt: number
+  submissionQuestions: number
+  submissionAnswers: number
+  jobMetadata: number
+  archivedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -124,6 +139,10 @@ export type ApplicationMinAggregateInputType = {
   status?: true
   appliedBy?: true
   appliedAt?: true
+  submissionStatus?: true
+  submissionMessage?: true
+  submissionAttemptedAt?: true
+  archivedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -145,6 +164,10 @@ export type ApplicationMaxAggregateInputType = {
   status?: true
   appliedBy?: true
   appliedAt?: true
+  submissionStatus?: true
+  submissionMessage?: true
+  submissionAttemptedAt?: true
+  archivedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -166,6 +189,13 @@ export type ApplicationCountAggregateInputType = {
   status?: true
   appliedBy?: true
   appliedAt?: true
+  submissionStatus?: true
+  submissionMessage?: true
+  submissionAttemptedAt?: true
+  submissionQuestions?: true
+  submissionAnswers?: true
+  jobMetadata?: true
+  archivedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -274,6 +304,13 @@ export type ApplicationGroupByOutputType = {
   status: $Enums.ApplicationStatus
   appliedBy: $Enums.AppliedBy
   appliedAt: Date | null
+  submissionStatus: string
+  submissionMessage: string
+  submissionAttemptedAt: Date | null
+  submissionQuestions: runtime.JsonValue
+  submissionAnswers: runtime.JsonValue
+  jobMetadata: runtime.JsonValue
+  archivedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: ApplicationCountAggregateOutputType | null
@@ -318,6 +355,13 @@ export type ApplicationWhereInput = {
   status?: Prisma.EnumApplicationStatusFilter<"Application"> | $Enums.ApplicationStatus
   appliedBy?: Prisma.EnumAppliedByFilter<"Application"> | $Enums.AppliedBy
   appliedAt?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
+  submissionStatus?: Prisma.StringFilter<"Application"> | string
+  submissionMessage?: Prisma.StringFilter<"Application"> | string
+  submissionAttemptedAt?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
+  submissionQuestions?: Prisma.JsonFilter<"Application">
+  submissionAnswers?: Prisma.JsonFilter<"Application">
+  jobMetadata?: Prisma.JsonFilter<"Application">
+  archivedAt?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Application"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Application"> | Date | string
 }
@@ -339,6 +383,13 @@ export type ApplicationOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   appliedBy?: Prisma.SortOrder
   appliedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  submissionStatus?: Prisma.SortOrder
+  submissionMessage?: Prisma.SortOrder
+  submissionAttemptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  submissionQuestions?: Prisma.SortOrder
+  submissionAnswers?: Prisma.SortOrder
+  jobMetadata?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -364,6 +415,13 @@ export type ApplicationWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumApplicationStatusFilter<"Application"> | $Enums.ApplicationStatus
   appliedBy?: Prisma.EnumAppliedByFilter<"Application"> | $Enums.AppliedBy
   appliedAt?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
+  submissionStatus?: Prisma.StringFilter<"Application"> | string
+  submissionMessage?: Prisma.StringFilter<"Application"> | string
+  submissionAttemptedAt?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
+  submissionQuestions?: Prisma.JsonFilter<"Application">
+  submissionAnswers?: Prisma.JsonFilter<"Application">
+  jobMetadata?: Prisma.JsonFilter<"Application">
+  archivedAt?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Application"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Application"> | Date | string
 }, "id" | "userId_externalId">
@@ -385,6 +443,13 @@ export type ApplicationOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   appliedBy?: Prisma.SortOrder
   appliedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  submissionStatus?: Prisma.SortOrder
+  submissionMessage?: Prisma.SortOrder
+  submissionAttemptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  submissionQuestions?: Prisma.SortOrder
+  submissionAnswers?: Prisma.SortOrder
+  jobMetadata?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ApplicationCountOrderByAggregateInput
@@ -414,6 +479,13 @@ export type ApplicationScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumApplicationStatusWithAggregatesFilter<"Application"> | $Enums.ApplicationStatus
   appliedBy?: Prisma.EnumAppliedByWithAggregatesFilter<"Application"> | $Enums.AppliedBy
   appliedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
+  submissionStatus?: Prisma.StringWithAggregatesFilter<"Application"> | string
+  submissionMessage?: Prisma.StringWithAggregatesFilter<"Application"> | string
+  submissionAttemptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
+  submissionQuestions?: Prisma.JsonWithAggregatesFilter<"Application">
+  submissionAnswers?: Prisma.JsonWithAggregatesFilter<"Application">
+  jobMetadata?: Prisma.JsonWithAggregatesFilter<"Application">
+  archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Application"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Application"> | Date | string
 }
@@ -435,6 +507,13 @@ export type ApplicationCreateInput = {
   status?: $Enums.ApplicationStatus
   appliedBy?: $Enums.AppliedBy
   appliedAt?: Date | string | null
+  submissionStatus?: string
+  submissionMessage?: string
+  submissionAttemptedAt?: Date | string | null
+  submissionQuestions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  submissionAnswers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  jobMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  archivedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -456,6 +535,13 @@ export type ApplicationUncheckedCreateInput = {
   status?: $Enums.ApplicationStatus
   appliedBy?: $Enums.AppliedBy
   appliedAt?: Date | string | null
+  submissionStatus?: string
+  submissionMessage?: string
+  submissionAttemptedAt?: Date | string | null
+  submissionQuestions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  submissionAnswers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  jobMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  archivedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -477,6 +563,13 @@ export type ApplicationUpdateInput = {
   status?: Prisma.EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
   appliedBy?: Prisma.EnumAppliedByFieldUpdateOperationsInput | $Enums.AppliedBy
   appliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionMessage?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionQuestions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  submissionAnswers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  jobMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -498,6 +591,13 @@ export type ApplicationUncheckedUpdateInput = {
   status?: Prisma.EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
   appliedBy?: Prisma.EnumAppliedByFieldUpdateOperationsInput | $Enums.AppliedBy
   appliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionMessage?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionQuestions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  submissionAnswers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  jobMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -519,6 +619,13 @@ export type ApplicationCreateManyInput = {
   status?: $Enums.ApplicationStatus
   appliedBy?: $Enums.AppliedBy
   appliedAt?: Date | string | null
+  submissionStatus?: string
+  submissionMessage?: string
+  submissionAttemptedAt?: Date | string | null
+  submissionQuestions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  submissionAnswers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  jobMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  archivedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -540,6 +647,13 @@ export type ApplicationUpdateManyMutationInput = {
   status?: Prisma.EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
   appliedBy?: Prisma.EnumAppliedByFieldUpdateOperationsInput | $Enums.AppliedBy
   appliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionMessage?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionQuestions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  submissionAnswers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  jobMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -561,6 +675,13 @@ export type ApplicationUncheckedUpdateManyInput = {
   status?: Prisma.EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
   appliedBy?: Prisma.EnumAppliedByFieldUpdateOperationsInput | $Enums.AppliedBy
   appliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionMessage?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submissionQuestions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  submissionAnswers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  jobMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -587,6 +708,13 @@ export type ApplicationCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   appliedBy?: Prisma.SortOrder
   appliedAt?: Prisma.SortOrder
+  submissionStatus?: Prisma.SortOrder
+  submissionMessage?: Prisma.SortOrder
+  submissionAttemptedAt?: Prisma.SortOrder
+  submissionQuestions?: Prisma.SortOrder
+  submissionAnswers?: Prisma.SortOrder
+  jobMetadata?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -612,6 +740,10 @@ export type ApplicationMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   appliedBy?: Prisma.SortOrder
   appliedAt?: Prisma.SortOrder
+  submissionStatus?: Prisma.SortOrder
+  submissionMessage?: Prisma.SortOrder
+  submissionAttemptedAt?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -633,6 +765,10 @@ export type ApplicationMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   appliedBy?: Prisma.SortOrder
   appliedAt?: Prisma.SortOrder
+  submissionStatus?: Prisma.SortOrder
+  submissionMessage?: Prisma.SortOrder
+  submissionAttemptedAt?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -668,6 +804,13 @@ export type ApplicationSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   status?: boolean
   appliedBy?: boolean
   appliedAt?: boolean
+  submissionStatus?: boolean
+  submissionMessage?: boolean
+  submissionAttemptedAt?: boolean
+  submissionQuestions?: boolean
+  submissionAnswers?: boolean
+  jobMetadata?: boolean
+  archivedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["application"]>
@@ -689,6 +832,13 @@ export type ApplicationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   status?: boolean
   appliedBy?: boolean
   appliedAt?: boolean
+  submissionStatus?: boolean
+  submissionMessage?: boolean
+  submissionAttemptedAt?: boolean
+  submissionQuestions?: boolean
+  submissionAnswers?: boolean
+  jobMetadata?: boolean
+  archivedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["application"]>
@@ -710,6 +860,13 @@ export type ApplicationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   status?: boolean
   appliedBy?: boolean
   appliedAt?: boolean
+  submissionStatus?: boolean
+  submissionMessage?: boolean
+  submissionAttemptedAt?: boolean
+  submissionQuestions?: boolean
+  submissionAnswers?: boolean
+  jobMetadata?: boolean
+  archivedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["application"]>
@@ -731,11 +888,18 @@ export type ApplicationSelectScalar = {
   status?: boolean
   appliedBy?: boolean
   appliedAt?: boolean
+  submissionStatus?: boolean
+  submissionMessage?: boolean
+  submissionAttemptedAt?: boolean
+  submissionQuestions?: boolean
+  submissionAnswers?: boolean
+  jobMetadata?: boolean
+  archivedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ApplicationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "externalId" | "source" | "title" | "company" | "location" | "url" | "salary" | "matchScore" | "matchReason" | "coverLetter" | "notes" | "status" | "appliedBy" | "appliedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["application"]>
+export type ApplicationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "externalId" | "source" | "title" | "company" | "location" | "url" | "salary" | "matchScore" | "matchReason" | "coverLetter" | "notes" | "status" | "appliedBy" | "appliedAt" | "submissionStatus" | "submissionMessage" | "submissionAttemptedAt" | "submissionQuestions" | "submissionAnswers" | "jobMetadata" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["application"]>
 
 export type $ApplicationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Application"
@@ -757,6 +921,13 @@ export type $ApplicationPayload<ExtArgs extends runtime.Types.Extensions.Interna
     status: $Enums.ApplicationStatus
     appliedBy: $Enums.AppliedBy
     appliedAt: Date | null
+    submissionStatus: string
+    submissionMessage: string
+    submissionAttemptedAt: Date | null
+    submissionQuestions: runtime.JsonValue
+    submissionAnswers: runtime.JsonValue
+    jobMetadata: runtime.JsonValue
+    archivedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["application"]>
@@ -1198,6 +1369,13 @@ export interface ApplicationFieldRefs {
   readonly status: Prisma.FieldRef<"Application", 'ApplicationStatus'>
   readonly appliedBy: Prisma.FieldRef<"Application", 'AppliedBy'>
   readonly appliedAt: Prisma.FieldRef<"Application", 'DateTime'>
+  readonly submissionStatus: Prisma.FieldRef<"Application", 'String'>
+  readonly submissionMessage: Prisma.FieldRef<"Application", 'String'>
+  readonly submissionAttemptedAt: Prisma.FieldRef<"Application", 'DateTime'>
+  readonly submissionQuestions: Prisma.FieldRef<"Application", 'Json'>
+  readonly submissionAnswers: Prisma.FieldRef<"Application", 'Json'>
+  readonly jobMetadata: Prisma.FieldRef<"Application", 'Json'>
+  readonly archivedAt: Prisma.FieldRef<"Application", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Application", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Application", 'DateTime'>
 }

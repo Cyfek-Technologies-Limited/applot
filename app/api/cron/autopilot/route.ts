@@ -14,8 +14,16 @@ export async function GET(request: Request) {
     select: { userId: true },
   })
 
-  const results = await Promise.allSettled(profiles.map((p) => runAgentForUser(p.userId)))
-  const failed = results.filter((r) => r.status === 'rejected').length
+  // A bounded batch avoids exhausting browser memory or serverless duration.
+  const started = Date.now()
+  let failed = 0
+  let processed = 0
+  for (const profile of profiles) {
+    if (Date.now() - started > 210000) break
+    try { await runAgentForUser(profile.userId) }
+    catch { failed++ }
+    processed++
+  }
 
-  return Response.json({ users: profiles.length, failed })
+  return Response.json({ users: profiles.length, processed, deferred: profiles.length - processed, failed })
 }

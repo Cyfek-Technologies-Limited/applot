@@ -54,8 +54,9 @@ export const auth = betterAuth({
       : []),
   ],
   session: {
+    // Keep the persistent login for seven days from sign-in.
     expiresIn: 60 * 60 * 24 * 7,
-    updateAge: 60 * 60 * 24,
+    disableSessionRefresh: true,
   },
   ...(process.env.NODE_ENV === 'development' && process.env.V0_RUNTIME_URL
     ? {

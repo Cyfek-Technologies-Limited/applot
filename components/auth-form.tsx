@@ -34,7 +34,7 @@ export function AuthForm({
           password,
           name: String(form.get("name")),
         })
-      : await authClient.signIn.email({ email, password });
+      : await authClient.signIn.email({ email, password, rememberMe: true });
     setPending(false);
     if (error) {
       console.error("[applot] auth error", error);
@@ -160,6 +160,7 @@ export function AuthForm({
             {isSignUp ? "Sign in" : "Create an account"}
           </Link>
         </p>
+        <Link href="/privacy" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">Privacy policy</Link>
       </div>
     </main>
   );

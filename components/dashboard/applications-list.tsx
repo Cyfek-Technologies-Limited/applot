@@ -3,7 +3,7 @@
 import { Bot, ExternalLink, Trash2, User } from 'lucide-react'
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { deleteApplication, updateStatus } from '@/app/actions/applications'
+import { deleteApplication, updateStatus, saveApplicationAnswers } from '@/app/actions/applications'
 import { cn } from '@/lib/utils'
 
 export type ApplicationItem = {
@@ -20,10 +20,13 @@ export type ApplicationItem = {
   status: string
   appliedBy: string
   createdAt: string
+  submissionStatus: string
+  submissionMessage: string
+  submissionQuestions: string[]
 }
 
 const STATUSES = [
-  { value: 'PREPARED', label: 'Ready to send' },
+  { value: 'PREPARED', label: 'Not submitted' },
   { value: 'APPLIED', label: 'Applied' },
   { value: 'INTERVIEW', label: 'Interview' },
   { value: 'OFFER', label: 'Offer' },
@@ -192,7 +195,7 @@ function ApplicationRow({ app }: { app: ApplicationItem }) {
           className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-background transition-opacity hover:opacity-90"
         >
           <ExternalLink className="size-3.5" aria-hidden="true" />
-          {app.status === 'PREPARED' ? 'Open & apply' : 'View listing'}
+          View listing
         </button>
         {app.status === 'PREPARED' && (
           <button
@@ -200,7 +203,7 @@ function ApplicationRow({ app }: { app: ApplicationItem }) {
             onClick={() => changeStatus('APPLIED')}
             className="rounded-full border border-border px-4 py-2 text-xs font-semibold transition-colors hover:bg-secondary"
           >
-            Mark as sent
+            I submitted this myself
           </button>
         )}
         {app.coverLetter && (
@@ -222,6 +225,22 @@ function ApplicationRow({ app }: { app: ApplicationItem }) {
           <span className="sr-only">Remove application</span>
         </button>
       </div>
+
+      {app.submissionMessage && <p role="status" className="rounded-xl bg-secondary p-3 text-sm leading-6 text-secondary-foreground">{app.submissionStatus === 'SUBMITTED' ? 'Submitted: ' : app.submissionStatus === 'UNKNOWN' ? 'Confirmation needed: ' : ''}{app.submissionMessage}</p>}
+      {['NEEDS_INPUT', 'FAILED'].includes(app.submissionStatus) && (
+        <form action={(data) => startTransition(async () => {
+          const result = await saveApplicationAnswers(app.id, data)
+          if (result.ok) toast.success(result.message)
+          else toast.error(result.message)
+        })} className="flex flex-col gap-3 rounded-xl border border-border p-4">
+          <p className="text-sm font-medium">Complete these answers in Applot</p>
+          {app.submissionQuestions.map((question, i) => <label key={question} htmlFor={`${app.id}-answer-${i}`} className="flex flex-col gap-2 text-sm">
+            {question}
+            <input id={`${app.id}-answer-${i}`} name={question} required maxLength={3000} className="h-10 rounded-lg border border-border bg-background px-3" placeholder="Your answer (use exact option text for dropdowns)" />
+          </label>)}
+          <button type="submit" disabled={pending} className="self-start rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">Save answers for the agent</button>
+        </form>
+      )}
 
       {open && (
         <pre className="whitespace-pre-wrap rounded-xl bg-secondary p-4 font-sans text-sm leading-relaxed text-secondary-foreground">

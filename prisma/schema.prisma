@@ -97,6 +97,8 @@ model Profile {
   autopilot           Boolean  @default(false)
   resumeFileName      String   @default("")
   resumeText          String   @default("")
+  resumeData          Bytes?
+  resumeMimeType      String   @default("")
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -133,6 +135,13 @@ model Application {
   status      ApplicationStatus @default(PREPARED)
   appliedBy   AppliedBy         @default(AGENT)
   appliedAt   DateTime?
+  submissionStatus String @default("NOT_ATTEMPTED")
+  submissionMessage String @default("")
+  submissionAttemptedAt DateTime?
+  submissionQuestions Json @default("[]")
+  submissionAnswers Json @default("{}")
+  jobMetadata Json @default("{}")
+  archivedAt DateTime?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
@@ -152,4 +161,12 @@ model AgentRun {
 
   @@index([userId, createdAt])
   @@map("agent_run")
+}
+
+model AgentLease {
+  userId String @id
+  token String
+  expiresAt DateTime
+
+  @@map("agent_lease")
 }

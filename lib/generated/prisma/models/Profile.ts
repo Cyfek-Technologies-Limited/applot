@@ -58,6 +58,8 @@ export type ProfileMinAggregateOutputType = {
   autopilot: boolean | null
   resumeFileName: string | null
   resumeText: string | null
+  resumeData: runtime.Bytes | null
+  resumeMimeType: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -84,6 +86,8 @@ export type ProfileMaxAggregateOutputType = {
   autopilot: boolean | null
   resumeFileName: string | null
   resumeText: string | null
+  resumeData: runtime.Bytes | null
+  resumeMimeType: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -113,6 +117,8 @@ export type ProfileCountAggregateOutputType = {
   autopilot: number
   resumeFileName: number
   resumeText: number
+  resumeData: number
+  resumeMimeType: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -151,6 +157,8 @@ export type ProfileMinAggregateInputType = {
   autopilot?: true
   resumeFileName?: true
   resumeText?: true
+  resumeData?: true
+  resumeMimeType?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -177,6 +185,8 @@ export type ProfileMaxAggregateInputType = {
   autopilot?: true
   resumeFileName?: true
   resumeText?: true
+  resumeData?: true
+  resumeMimeType?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -206,6 +216,8 @@ export type ProfileCountAggregateInputType = {
   autopilot?: true
   resumeFileName?: true
   resumeText?: true
+  resumeData?: true
+  resumeMimeType?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -322,6 +334,8 @@ export type ProfileGroupByOutputType = {
   autopilot: boolean
   resumeFileName: string
   resumeText: string
+  resumeData: runtime.Bytes | null
+  resumeMimeType: string
   createdAt: Date
   updatedAt: Date
   _count: ProfileCountAggregateOutputType | null
@@ -374,6 +388,8 @@ export type ProfileWhereInput = {
   autopilot?: Prisma.BoolFilter<"Profile"> | boolean
   resumeFileName?: Prisma.StringFilter<"Profile"> | string
   resumeText?: Prisma.StringFilter<"Profile"> | string
+  resumeData?: Prisma.BytesNullableFilter<"Profile"> | runtime.Bytes | null
+  resumeMimeType?: Prisma.StringFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
 }
@@ -403,6 +419,8 @@ export type ProfileOrderByWithRelationInput = {
   autopilot?: Prisma.SortOrder
   resumeFileName?: Prisma.SortOrder
   resumeText?: Prisma.SortOrder
+  resumeData?: Prisma.SortOrderInput | Prisma.SortOrder
+  resumeMimeType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -435,6 +453,8 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   autopilot?: Prisma.BoolFilter<"Profile"> | boolean
   resumeFileName?: Prisma.StringFilter<"Profile"> | string
   resumeText?: Prisma.StringFilter<"Profile"> | string
+  resumeData?: Prisma.BytesNullableFilter<"Profile"> | runtime.Bytes | null
+  resumeMimeType?: Prisma.StringFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
 }, "id" | "userId">
@@ -464,6 +484,8 @@ export type ProfileOrderByWithAggregationInput = {
   autopilot?: Prisma.SortOrder
   resumeFileName?: Prisma.SortOrder
   resumeText?: Prisma.SortOrder
+  resumeData?: Prisma.SortOrderInput | Prisma.SortOrder
+  resumeMimeType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProfileCountOrderByAggregateInput
@@ -501,6 +523,8 @@ export type ProfileScalarWhereWithAggregatesInput = {
   autopilot?: Prisma.BoolWithAggregatesFilter<"Profile"> | boolean
   resumeFileName?: Prisma.StringWithAggregatesFilter<"Profile"> | string
   resumeText?: Prisma.StringWithAggregatesFilter<"Profile"> | string
+  resumeData?: Prisma.BytesNullableWithAggregatesFilter<"Profile"> | runtime.Bytes | null
+  resumeMimeType?: Prisma.StringWithAggregatesFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
 }
@@ -530,6 +554,8 @@ export type ProfileCreateInput = {
   autopilot?: boolean
   resumeFileName?: string
   resumeText?: string
+  resumeData?: runtime.Bytes | null
+  resumeMimeType?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -559,6 +585,8 @@ export type ProfileUncheckedCreateInput = {
   autopilot?: boolean
   resumeFileName?: string
   resumeText?: string
+  resumeData?: runtime.Bytes | null
+  resumeMimeType?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -588,6 +616,8 @@ export type ProfileUpdateInput = {
   autopilot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   resumeFileName?: Prisma.StringFieldUpdateOperationsInput | string
   resumeText?: Prisma.StringFieldUpdateOperationsInput | string
+  resumeData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  resumeMimeType?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -617,6 +647,8 @@ export type ProfileUncheckedUpdateInput = {
   autopilot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   resumeFileName?: Prisma.StringFieldUpdateOperationsInput | string
   resumeText?: Prisma.StringFieldUpdateOperationsInput | string
+  resumeData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  resumeMimeType?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -646,6 +678,8 @@ export type ProfileCreateManyInput = {
   autopilot?: boolean
   resumeFileName?: string
   resumeText?: string
+  resumeData?: runtime.Bytes | null
+  resumeMimeType?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -675,6 +709,8 @@ export type ProfileUpdateManyMutationInput = {
   autopilot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   resumeFileName?: Prisma.StringFieldUpdateOperationsInput | string
   resumeText?: Prisma.StringFieldUpdateOperationsInput | string
+  resumeData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  resumeMimeType?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -704,6 +740,8 @@ export type ProfileUncheckedUpdateManyInput = {
   autopilot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   resumeFileName?: Prisma.StringFieldUpdateOperationsInput | string
   resumeText?: Prisma.StringFieldUpdateOperationsInput | string
+  resumeData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  resumeMimeType?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -741,6 +779,8 @@ export type ProfileCountOrderByAggregateInput = {
   autopilot?: Prisma.SortOrder
   resumeFileName?: Prisma.SortOrder
   resumeText?: Prisma.SortOrder
+  resumeData?: Prisma.SortOrder
+  resumeMimeType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -772,6 +812,8 @@ export type ProfileMaxOrderByAggregateInput = {
   autopilot?: Prisma.SortOrder
   resumeFileName?: Prisma.SortOrder
   resumeText?: Prisma.SortOrder
+  resumeData?: Prisma.SortOrder
+  resumeMimeType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -798,6 +840,8 @@ export type ProfileMinOrderByAggregateInput = {
   autopilot?: Prisma.SortOrder
   resumeFileName?: Prisma.SortOrder
   resumeText?: Prisma.SortOrder
+  resumeData?: Prisma.SortOrder
+  resumeMimeType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -842,6 +886,10 @@ export type ProfileUpdatepreferredLocationsInput = {
   push?: string | string[]
 }
 
+export type NullableBytesFieldUpdateOperationsInput = {
+  set?: runtime.Bytes | null
+}
+
 
 
 export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -869,6 +917,8 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   autopilot?: boolean
   resumeFileName?: boolean
   resumeText?: boolean
+  resumeData?: boolean
+  resumeMimeType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["profile"]>
@@ -898,6 +948,8 @@ export type ProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   autopilot?: boolean
   resumeFileName?: boolean
   resumeText?: boolean
+  resumeData?: boolean
+  resumeMimeType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["profile"]>
@@ -927,6 +979,8 @@ export type ProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   autopilot?: boolean
   resumeFileName?: boolean
   resumeText?: boolean
+  resumeData?: boolean
+  resumeMimeType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["profile"]>
@@ -956,11 +1010,13 @@ export type ProfileSelectScalar = {
   autopilot?: boolean
   resumeFileName?: boolean
   resumeText?: boolean
+  resumeData?: boolean
+  resumeMimeType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "fullName" | "email" | "phone" | "location" | "headline" | "summary" | "linkedinUrl" | "portfolioUrl" | "yearsExperience" | "workAuthorization" | "requiresSponsorship" | "willingToRelocate" | "salaryExpectation" | "noticePeriod" | "skills" | "targetRoles" | "preferredLocations" | "remoteOnly" | "dailyLimit" | "autopilot" | "resumeFileName" | "resumeText" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
+export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "fullName" | "email" | "phone" | "location" | "headline" | "summary" | "linkedinUrl" | "portfolioUrl" | "yearsExperience" | "workAuthorization" | "requiresSponsorship" | "willingToRelocate" | "salaryExpectation" | "noticePeriod" | "skills" | "targetRoles" | "preferredLocations" | "remoteOnly" | "dailyLimit" | "autopilot" | "resumeFileName" | "resumeText" | "resumeData" | "resumeMimeType" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
 
 export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Profile"
@@ -990,6 +1046,8 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     autopilot: boolean
     resumeFileName: string
     resumeText: string
+    resumeData: runtime.Bytes | null
+    resumeMimeType: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["profile"]>
@@ -1439,6 +1497,8 @@ export interface ProfileFieldRefs {
   readonly autopilot: Prisma.FieldRef<"Profile", 'Boolean'>
   readonly resumeFileName: Prisma.FieldRef<"Profile", 'String'>
   readonly resumeText: Prisma.FieldRef<"Profile", 'String'>
+  readonly resumeData: Prisma.FieldRef<"Profile", 'Bytes'>
+  readonly resumeMimeType: Prisma.FieldRef<"Profile", 'String'>
   readonly createdAt: Prisma.FieldRef<"Profile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Profile", 'DateTime'>
 }

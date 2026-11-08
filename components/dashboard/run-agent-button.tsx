@@ -38,7 +38,7 @@ export function RunAgentButton({
         ) : (
           <Sparkles className="size-4" aria-hidden="true" />
         )}
-        {pending ? 'Agent is hunting…' : 'Run agent now'}
+        {pending ? 'Agent is finding and applying…' : 'Find & apply automatically'}
       </Button>
     </div>
   )

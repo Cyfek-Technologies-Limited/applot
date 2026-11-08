@@ -403,7 +403,8 @@ export const ModelName = {
   Verification: 'Verification',
   Profile: 'Profile',
   Application: 'Application',
-  AgentRun: 'AgentRun'
+  AgentRun: 'AgentRun',
+  AgentLease: 'AgentLease'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "profile" | "application" | "agentRun"
+    modelProps: "user" | "session" | "account" | "verification" | "profile" | "application" | "agentRun" | "agentLease"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -941,6 +942,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AgentLease: {
+      payload: Prisma.$AgentLeasePayload<ExtArgs>
+      fields: Prisma.AgentLeaseFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentLeaseFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentLeaseFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>
+        }
+        findFirst: {
+          args: Prisma.AgentLeaseFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentLeaseFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>
+        }
+        findMany: {
+          args: Prisma.AgentLeaseFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>[]
+        }
+        create: {
+          args: Prisma.AgentLeaseCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>
+        }
+        createMany: {
+          args: Prisma.AgentLeaseCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AgentLeaseCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>[]
+        }
+        delete: {
+          args: Prisma.AgentLeaseDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>
+        }
+        update: {
+          args: Prisma.AgentLeaseUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentLeaseDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentLeaseUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AgentLeaseUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>[]
+        }
+        upsert: {
+          args: Prisma.AgentLeaseUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentLeasePayload>
+        }
+        aggregate: {
+          args: Prisma.AgentLeaseAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentLease>
+        }
+        groupBy: {
+          args: Prisma.AgentLeaseGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentLeaseGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentLeaseCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentLeaseCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1063,6 +1138,8 @@ export const ProfileScalarFieldEnum = {
   autopilot: 'autopilot',
   resumeFileName: 'resumeFileName',
   resumeText: 'resumeText',
+  resumeData: 'resumeData',
+  resumeMimeType: 'resumeMimeType',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1087,6 +1164,13 @@ export const ApplicationScalarFieldEnum = {
   status: 'status',
   appliedBy: 'appliedBy',
   appliedAt: 'appliedAt',
+  submissionStatus: 'submissionStatus',
+  submissionMessage: 'submissionMessage',
+  submissionAttemptedAt: 'submissionAttemptedAt',
+  submissionQuestions: 'submissionQuestions',
+  submissionAnswers: 'submissionAnswers',
+  jobMetadata: 'jobMetadata',
+  archivedAt: 'archivedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1107,12 +1191,28 @@ export const AgentRunScalarFieldEnum = {
 export type AgentRunScalarFieldEnum = (typeof AgentRunScalarFieldEnum)[keyof typeof AgentRunScalarFieldEnum]
 
 
+export const AgentLeaseScalarFieldEnum = {
+  userId: 'userId',
+  token: 'token',
+  expiresAt: 'expiresAt'
+} as const
+
+export type AgentLeaseScalarFieldEnum = (typeof AgentLeaseScalarFieldEnum)[keyof typeof AgentLeaseScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1129,6 +1229,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -1187,6 +1296,20 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'Bytes'
+ */
+export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes[]'
+ */
+export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
+    
+
+
+/**
  * Reference to a field of type 'ApplicationStatus'
  */
 export type EnumApplicationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ApplicationStatus'>
@@ -1211,6 +1334,20 @@ export type EnumAppliedByFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'AppliedBy[]'
  */
 export type ListEnumAppliedByFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AppliedBy[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -1385,6 +1522,7 @@ export type GlobalOmitConfig = {
   profile?: Prisma.ProfileOmit
   application?: Prisma.ApplicationOmit
   agentRun?: Prisma.AgentRunOmit
+  agentLease?: Prisma.AgentLeaseOmit
 }
 
 /* Types for Logging */

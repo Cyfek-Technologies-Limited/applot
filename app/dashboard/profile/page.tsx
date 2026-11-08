@@ -1,5 +1,4 @@
-import { ProfileForm } from '@/components/dashboard/profile-form'
-import { ResumeUpload } from '@/components/dashboard/resume-upload'
+import { ProfileEditor } from '@/components/dashboard/profile-editor'
 import { getSession, requireUserId } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
@@ -21,8 +20,9 @@ export default async function ProfilePage() {
           type them again.
         </p>
       </div>
-      <ResumeUpload fileName={profile?.resumeFileName ?? ''} preview={profile?.resumeText.slice(0, 400) ?? ''} />
-      <ProfileForm
+      <ProfileEditor
+        fileName={profile?.resumeFileName ?? ''}
+        preview={profile?.resumeText.slice(0, 400) ?? ''}
         defaults={{
           fullName: profile?.fullName || session?.user.name || '',
           email: profile?.email || session?.user.email || '',

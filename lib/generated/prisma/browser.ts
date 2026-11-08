@@ -52,3 +52,8 @@ export type Application = Prisma.ApplicationModel
  * 
  */
 export type AgentRun = Prisma.AgentRunModel
+/**
+ * Model AgentLease
+ * 
+ */
+export type AgentLease = Prisma.AgentLeaseModel

@@ -1,13 +1,14 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
+import type { ResumeProfile } from '@/lib/resume-profile'
 import { saveProfile } from '@/app/actions/profile'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
-type Defaults = {
+export type Defaults = {
   fullName: string
   email: string
   phone: string
@@ -70,11 +71,29 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   )
 }
 
-export function ProfileForm({ defaults: d }: { defaults: Defaults }) {
+export function ProfileForm({ defaults: d, extracted }: { defaults: Defaults; extracted?: ResumeProfile }) {
   const [state, action, pending] = useActionState(saveProfile, null)
+  const form = useRef<HTMLFormElement>(null)
+  const edited = useRef(new Set<string>())
+  useEffect(() => {
+    if (!extracted || !form.current) return
+    for (const [name, value] of Object.entries(extracted)) {
+      const field = form.current.elements.namedItem(name)
+      if ((field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)
+        && !edited.current.has(name)
+        && (!field.value.trim() || (name === 'yearsExperience' && field.value === '0'))) {
+        field.value = String(value)
+        field.defaultValue = String(value)
+      }
+    }
+  }, [extracted])
 
   return (
-    <form action={action} className="flex flex-col gap-6">
+    <form ref={form} action={action} onChange={(event) => {
+      const target = event.target
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) edited.current.add(target.name)
+    }} className="flex flex-col gap-6">
+      {extracted && <p role="status" className="text-sm text-muted-foreground">Available CV details have filled empty fields. Existing answers and your edits are kept. Check suggested target roles, add missing preferences, then save.</p>}
       <Group title="What you're looking for">
         <Field
           id="targetRoles"
@@ -90,7 +109,7 @@ export function ProfileForm({ defaults: d }: { defaults: Defaults }) {
             label="Preferred locations"
             defaultValue={d.preferredLocations}
             placeholder="London, Berlin"
-            hint="Ignored when remote only is on."
+            hint="Cities for on-site jobs. Remote roles must accept applicants in your current country."
           />
           <Field
             id="dailyLimit"
@@ -144,6 +163,7 @@ export function ProfileForm({ defaults: d }: { defaults: Defaults }) {
       </Group>
 
       <div className="flex flex-wrap items-center gap-4">
+        <p className="w-full text-sm text-muted-foreground">Running the agent authorizes it to submit matching applications using your saved profile and CV. Autopilot repeats this daily. Forms needing extra answers or human verification are flagged here for your attention.</p>
         <Button type="submit" disabled={pending} className="h-11 rounded-full px-8">
           {pending ? 'Saving…' : 'Save profile'}
         </Button>

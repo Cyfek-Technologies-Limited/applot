@@ -1,4 +1,7 @@
 import 'server-only'
+import { additionalSources } from './additional-sources'
+import { matchesLocation, type SearchLocation } from './location'
+import { canonicalJobUrl } from './identity'
 
 export type JobListing = {
   externalId: string
@@ -11,6 +14,9 @@ export type JobListing = {
   description: string
   tags: string[]
   remote: boolean
+  allowedCountries?: string[]
+  timezoneRestricted?: boolean
+  allowedOffsets?: number[]
 }
 
 const UA = 'Mozilla/5.0 (compatible; ApplotBot/1.0; +https://applot.app)'
@@ -33,12 +39,12 @@ async function getJson<T>(url: string): Promise<T | null> {
     const res = await fetch(url, {
       headers: { 'User-Agent': UA, Accept: 'application/json' },
       signal: AbortSignal.timeout(12000),
-      next: { revalidate: 900 },
+      next: { revalidate: new URL(url).hostname === 'himalayas.app' ? 86400 : new URL(url).hostname === 'remotive.com' ? 21600 : 3600 },
     })
     if (!res.ok) return null
     return (await res.json()) as T
   } catch (error) {
-    console.error('[applot] job source failed', url, error)
+    console.error('[applot] job source failed', new URL(url).hostname, error instanceof Error ? error.name : 'RequestError')
     return null
   }
 }
@@ -186,21 +192,32 @@ async function fromArbeitnow(query: string): Promise<JobListing[]> {
     }))
 }
 
-export async function searchJobs(roles: string[]): Promise<JobListing[]> {
+export async function searchJobs(roles: string[], location: SearchLocation): Promise<JobListing[]> {
   const queries = roles.length ? roles.slice(0, 3) : ['developer']
-  const batches = await Promise.all(
+  const batches = (await Promise.allSettled(
     queries.flatMap((q) => [
       fromRemotive(q),
       fromJobicy(q),
       fromRemoteOk(q),
       fromArbeitnow(q),
     ]),
-  )
+  )).flatMap(result => result.status === 'fulfilled' ? [result.value] : [])
+  const extra = (await Promise.all(queries.map(q => additionalSources(q, location, getJson)))).flat()
+  const queues = [...batches, ...extra.map(result => result.jobs)]
+  // Interleave feeds so one provider cannot consume the entire scoring batch.
+  const interleaved: JobListing[] = []
+  for (let index = 0; index < Math.max(0, ...queues.map(q => q.length)); index++) {
+    for (const queue of queues) if (queue[index]) interleaved.push(queue[index])
+  }
   const seen = new Set<string>()
+  const seenUrls = new Set<string>()
   const all: JobListing[] = []
-  for (const job of batches.flat()) {
-    if (!job.url || !job.title || seen.has(job.externalId)) continue
-    seen.add(job.externalId)
+  for (const job of interleaved) {
+    const key = `${job.company}:${job.title}:${job.location}`.toLowerCase().replace(/[^a-z0-9]/g, '')
+    const urlKey = canonicalJobUrl(job.url)
+    if (!job.url?.startsWith('https://') || !job.title || seen.has(key) || seenUrls.has(urlKey) || !matchesLocation(job, location)) continue
+    seen.add(key)
+    seenUrls.add(urlKey)
     all.push(job)
   }
   return all
