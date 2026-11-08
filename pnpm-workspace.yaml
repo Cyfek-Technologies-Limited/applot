@@ -7,3 +7,5 @@ minimumReleaseAgeExclude:
 allowBuilds:
   '@prisma/engines': true
   prisma: true
+  # Tesseract's postinstall only runs opencollective-postinstall (a funding notice).
+  tesseract.js: false
