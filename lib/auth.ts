@@ -2,22 +2,11 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { headers } from 'next/headers'
 import { prisma } from '@/lib/db'
+import { resolveAuthBaseURL, resolveTrustedOrigins } from '@/lib/auth-config'
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
-  baseURL:
-    process.env.BETTER_AUTH_URL?.trim() ||
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : process.env.V0_RUNTIME_URL ??
-          (process.env.NODE_ENV === 'development'
-            ? {
-                allowedHosts: ['localhost:*', '127.0.0.1:*'],
-                fallback: 'http://localhost:3000',
-              }
-            : undefined)),
+  baseURL: resolveAuthBaseURL(process.env),
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -32,27 +21,7 @@ export const auth = betterAuth({
         },
       }
     : {}),
-  trustedOrigins: [
-    ...(process.env.NODE_ENV === 'development'
-      ? [
-          'http://localhost:3000',
-          ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
-          ...(process.env.V0_DEV_APP_URL ? [process.env.V0_DEV_APP_URL] : []),
-          ...(process.env.V0_BUILD_URL ? [process.env.V0_BUILD_URL] : []),
-          ...(process.env.V0_SANDBOX_URL ? [process.env.V0_SANDBOX_URL] : []),
-        ]
-      : []),
-    ...(process.env.NODE_ENV === 'production'
-      ? [
-          ...(process.env.VERCEL_URL
-            ? [`https://${process.env.VERCEL_URL}`]
-            : []),
-          ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
-            ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
-            : []),
-        ]
-      : []),
-  ],
+  trustedOrigins: resolveTrustedOrigins(process.env),
   session: {
     // Keep the persistent login for seven days from sign-in.
     expiresIn: 60 * 60 * 24 * 7,
