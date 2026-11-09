@@ -10,10 +10,40 @@ export type SubmissionResult = {
   questions?: string[]
 }
 
-const hosts = ['jobs.lever.co', 'jobs.eu.lever.co', 'boards.greenhouse.io', 'job-boards.greenhouse.io', 'boards.eu.greenhouse.io', 'job-boards.eu.greenhouse.io', 'jobs.ashbyhq.com']
+const hosts = ['jobs.lever.co', 'jobs.eu.lever.co', 'boards.greenhouse.io', 'job-boards.greenhouse.io', 'boards.eu.greenhouse.io', 'job-boards.eu.greenhouse.io', 'jobs.ashbyhq.com', 'apply.workable.com']
+const listingHosts = ['himalayas.app', 'remotive.com', 'jobicy.com', 'remoteok.com', 'www.arbeitnow.com', 'arbeitnow.com']
+function safeUrl(value: string): URL | undefined {
+  try { const url = new URL(value); if (url.protocol === 'https:' && !url.username && !url.password && !url.port) return url } catch { /* invalid URL */ }
+}
 export function supportedApplicationUrl(value: string): boolean {
-  try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password && !url.port && hosts.includes(url.hostname) }
-  catch { return false }
+  const url = safeUrl(value)
+  return !!url && hosts.includes(url.hostname)
+}
+export function resolvableListingUrl(value: string): boolean {
+  const url = safeUrl(value)
+  return !!url && listingHosts.includes(url.hostname)
+}
+
+// Read public listing links before attaching any candidate information. Never
+// treat an aggregator's "applied" tracker as an employer submission confirmation.
+export async function openApplicationForm(page: Page, value: string): Promise<SubmissionResult | undefined> {
+  const response = await page.goto(applicationUrl(value), { waitUntil: 'domcontentloaded', timeout: 25000 })
+  if (!response?.ok()) return { status: 'FAILED', message: 'The job listing could not be opened. No application was sent.' }
+  if (!supportedApplicationUrl(page.url())) {
+    const links = await page.locator('a[href]').evaluateAll(nodes => nodes.map(node => ({ url: (node as HTMLAnchorElement).href, text: node.textContent ?? '' })))
+    const applyLinks = links.filter(link => /apply|application/i.test(link.text) && supportedApplicationUrl(link.url))
+    const destinations = [...new Set(applyLinks.map(link => applicationUrl(link.url)))]
+    if (destinations.length !== 1) return { status: 'UNSUPPORTED', message: new URL(value).hostname === 'himalayas.app'
+      ? 'Himalayas provided its listing page, not the employer application form. No public supported application link was found; nothing was submitted. This listing needs a direct employer link or a connected Himalayas account.'
+      : 'No supported employer application form was found on this listing. Nothing was submitted.' }
+    const employer = await page.goto(destinations[0], { waitUntil: 'domcontentloaded', timeout: 25000 })
+    if (!employer?.ok() || !supportedApplicationUrl(page.url())) return { status: 'FAILED', message: 'The employer form could not be opened. No application was sent.' }
+  }
+  // Workable initially shows the description and opens the form from Apply.
+  if (!await page.locator('input[type="email"], input[type="file"]').count()) {
+    const apply = page.getByRole('button', { name: /^apply(?: for this job| now)?$/i }).first()
+    if (await apply.count()) await apply.click()
+  }
 }
 
 function applicationUrl(value: string): string {
@@ -104,14 +134,14 @@ export async function fillAndSubmit(page: Page, profile: Profile, coverLetter: s
 }
 
 export async function submitApplication(url: string, profile: Profile, letter: string, answers: Record<string, string> = {}): Promise<SubmissionResult> {
-  if (!supportedApplicationUrl(url)) return { status: 'UNSUPPORTED', message: 'Automatic submission is currently supported for standard Lever, Greenhouse, and Ashby forms. This employer requires another integration.' }
+  if (!supportedApplicationUrl(url) && !resolvableListingUrl(url)) return { status: 'UNSUPPORTED', message: 'This employer application website is not supported yet. No application was sent.' }
   if (!profile.resumeData) return { status: 'NEEDS_INPUT', message: 'Upload your CV again so the agent can attach the original file.', questions: ['Upload your original CV'] }
   let browser: Browser | undefined
   try {
     browser = process.env.APPLICATION_BROWSER_WS_URL
       ? await chromium.connectOverCDP(process.env.APPLICATION_BROWSER_WS_URL, { timeout: 15000 })
       : await chromium.launch({ headless: true })
-    const context = await browser.newContext({ acceptDownloads: false })
+    const context = await browser.newContext({ acceptDownloads: false, serviceWorkers: 'block' })
     const page = await context.newPage()
     page.setDefaultTimeout(5000)
     const timeout = setTimeout(() => void context.close().catch(() => undefined), 60000)
@@ -120,11 +150,13 @@ export async function submitApplication(url: string, profile: Profile, letter: s
       // aggregator redirects or send a candidate's CV to an unrecognized host.
       await context.route('**/*', route => {
         const requestUrl = new URL(route.request().url())
-        const allowed = ['lever.co', 'greenhouse.io', 'ashbyhq.com', 'google.com', 'gstatic.com', 'hcaptcha.com', 'cloudflare.com', 'cloudfront.net'].some(host => requestUrl.hostname === host || requestUrl.hostname.endsWith(`.${host}`))
+        const allowed = ['lever.co', 'greenhouse.io', 'ashbyhq.com', 'workable.com', 'workablecdn.com', 'google.com', 'gstatic.com', 'hcaptcha.com', 'cloudflare.com', 'cloudfront.net'].some(host => requestUrl.hostname === host || requestUrl.hostname.endsWith(`.${host}`)) || listingHosts.includes(requestUrl.hostname)
+        // Listing pages are read-only: they must never receive a CV or a form POST.
+        if (listingHosts.includes(requestUrl.hostname) && !['GET', 'HEAD'].includes(route.request().method())) return route.abort()
         return requestUrl.protocol === 'https:' && allowed ? route.continue() : route.abort()
       })
-      const response = await page.goto(applicationUrl(url), { waitUntil: 'domcontentloaded', timeout: 25000 })
-      if (!response?.ok()) return { status: 'FAILED', message: 'The employer application page could not be loaded. Nothing was sent.' }
+      const blocked = await openApplicationForm(page, url)
+      if (blocked) return blocked
       await page.locator('input[type="email"], input[type="file"]').first().waitFor({ state: 'attached', timeout: 10000 })
       return await fillAndSubmit(page, profile, letter, answers)
     } finally {

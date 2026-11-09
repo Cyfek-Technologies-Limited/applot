@@ -138,6 +138,14 @@ async function runLockedAgent(userId: string) {
   // A process interrupted during submission may already have sent it. Never retry blindly.
   await prisma.application.updateMany({ where: { userId, submissionStatus: 'SUBMITTING' }, data: { submissionStatus: 'UNKNOWN', submissionMessage: 'The previous run was interrupted. Check for an employer confirmation before trying again.' } })
 
+  // Revisit the old host-only rejection once with the listing-link resolver.
+  // These rows were rejected before opening a browser, so no submission occurred.
+  await prisma.application.updateMany({ where: {
+    userId, archivedAt: null, status: 'PREPARED', submissionStatus: 'UNSUPPORTED',
+    submissionMessage: 'Automatic submission is currently supported for standard Lever, Greenhouse, and Ashby forms. This employer requires another integration.',
+    OR: ['himalayas.app', 'remotive.com', 'jobicy.com', 'remoteok.com', 'www.arbeitnow.com', 'arbeitnow.com', 'apply.workable.com'].map(host => ({ url: { startsWith: `https://${host}/` } })),
+  }, data: { submissionStatus: 'RETRY', submissionMessage: 'The agent will check this listing for an employer application form on this run.' } })
+
   const startOfDay = new Date()
   startOfDay.setUTCHours(0, 0, 0, 0)
   const queuedToday = await prisma.application.count({

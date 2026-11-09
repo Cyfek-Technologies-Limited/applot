@@ -102,7 +102,37 @@ test('only supported HTTPS ATS destinations can receive automatic applications',
   assert.equal(supportedApplicationUrl('https://jobs.lever.co/example/id'), true)
   assert.equal(supportedApplicationUrl('https://job-boards.greenhouse.io/example/jobs/123'), true)
   assert.equal(supportedApplicationUrl('https://jobs.ashbyhq.com/example/id'), true)
+  assert.equal(supportedApplicationUrl('https://apply.workable.com/example/j/123/'), true)
   for (const url of ['http://jobs.lever.co/example/id', 'https://jobs.lever.co.evil.example/id', 'http://localhost:3000', 'https://jobs.lever.co:444/id']) assert.equal(supportedApplicationUrl(url), false)
+})
+
+test('listing handoff follows one supported apply link and rejects ambiguous or unsafe destinations', async () => {
+  const { openApplicationForm, resolvableListingUrl } = load('lib/jobs/submit-application.ts')
+  assert.equal(resolvableListingUrl('https://himalayas.app/companies/example/jobs/role'), true)
+  assert.equal(resolvableListingUrl('https://himalayas.app.evil.example/jobs/role'), false)
+  assert.equal(resolvableListingUrl('https://user:secret@himalayas.app/jobs/role'), false)
+  for (const links of [
+    [{ url: 'https://jobs.lever.co/example/job', text: 'Apply now' }],
+    [{ url: 'https://evil.example/apply', text: 'Apply now' }],
+    [{ url: 'https://jobs.lever.co/example/one', text: 'Apply' }, { url: 'https://jobs.lever.co/example/two', text: 'Apply' }],
+    [],
+  ]) {
+    const visited = []
+    let current
+    const page = {
+      goto: async url => { visited.push(url); current = url; return { ok: () => true } },
+      url: () => current,
+      locator: selector => selector === 'a[href]' ? { evaluateAll: async () => links } : { count: async () => 1 },
+    }
+    const result = await openApplicationForm(page, 'https://himalayas.app/companies/example/jobs/role')
+    if (links.length === 1 && links[0].url.includes('lever.co')) {
+      assert.equal(result, undefined)
+      assert.equal(visited[1], 'https://jobs.lever.co/example/job/apply')
+    } else {
+      assert.equal(result.status, 'UNSUPPORTED')
+      assert.equal(visited.length, 1)
+    }
+  }
 })
 
 test('agent confirms applied status and does not retry uncertain submissions', async () => {
@@ -151,7 +181,7 @@ test('agent confirms applied status and does not retry uncertain submissions', a
 
 test('browser attaches CV, submits once, requests missing answers, and preserves uncertain outcomes', { timeout: 60000, skip: process.env.SKIP_BROWSER_TESTS === '1' }, async () => {
   const { chromium } = require('playwright')
-  const { fillAndSubmit } = load('lib/jobs/submit-application.ts')
+  const { fillAndSubmit, openApplicationForm } = load('lib/jobs/submit-application.ts')
   const { encryptResume } = load('lib/resume-storage.ts')
   const browser = await chromium.launch({ headless: true })
   try {
@@ -159,6 +189,14 @@ test('browser attaches CV, submits once, requests missing answers, and preserves
     page.setDefaultTimeout(2000)
     const profile = { fullName: 'Jane Doe', email: 'jane@example.com', phone: '', location: 'Lagos, Nigeria', resumeFileName: 'cv.txt', resumeMimeType: 'text/plain', resumeData: encryptResume(Buffer.from('Fixture CV')), linkedinUrl: '', portfolioUrl: '', summary: '', workAuthorization: '', noticePeriod: '', salaryExpectation: '' }
     const form = (extra = '', success = true) => `<form onsubmit="event.preventDefault(); window.sent=(window.sent||0)+1; ${success ? "this.outerHTML='<h2>Application submitted!</h2>'" : ''}"><label>Full name<input name="name" required></label><label>Email<input type="email" name="email" required></label><label>Resume<input type="file" required></label>${extra}<button type="submit">Submit application</button></form>`
+    // Intercept both pages locally; no employer or job board receives requests.
+    await page.route('**/*', route => route.fulfill({ contentType: 'text/html', body: route.request().url().includes('himalayas.app')
+      ? '<a href="https://jobs.lever.co/fixture/job">Apply now</a>' : form() }))
+    assert.equal(await openApplicationForm(page, 'https://himalayas.app/companies/fixture/jobs/role'), undefined)
+    assert.equal(page.url(), 'https://jobs.lever.co/fixture/job/apply')
+    assert.equal((await fillAndSubmit(page, profile, 'Cover letter', {})).status, 'SUBMITTED')
+    await page.unroute('**/*')
+    await page.evaluate(() => { window.sent = 0 })
     await page.setContent(form())
     const result = await fillAndSubmit(page, profile, 'Cover letter', {})
     assert.equal(result.status, 'SUBMITTED')
