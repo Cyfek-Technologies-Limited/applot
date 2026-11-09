@@ -15,14 +15,18 @@ export function normalizeAuthUrl(value: string | undefined, variable: string): s
 }
 
 export function resolveAuthBaseURL(env: Environment) {
-  return normalizeAuthUrl(env.BETTER_AUTH_URL, 'BETTER_AUTH_URL')
+  const configured = normalizeAuthUrl(env.BETTER_AUTH_URL, 'BETTER_AUTH_URL')
     || normalizeAuthUrl(env.VERCEL_PROJECT_PRODUCTION_URL, 'VERCEL_PROJECT_PRODUCTION_URL')
     || normalizeAuthUrl(env.VERCEL_URL, 'VERCEL_URL')
     || normalizeAuthUrl(env.V0_RUNTIME_URL, 'V0_RUNTIME_URL')
-    || (env.NODE_ENV === 'development' ? {
-      allowedHosts: ['localhost:*', '127.0.0.1:*'],
-      fallback: 'http://localhost:3000',
-    } : undefined)
+  if (env.NODE_ENV === 'development') {
+    return {
+      // Use the request's actual port even when .env contains a fixed base URL.
+      allowedHosts: [...new Set(['localhost:*', '127.0.0.1:*', ...(configured ? [new URL(configured).host] : [])])],
+      fallback: configured || 'http://localhost:3000',
+    }
+  }
+  return configured
 }
 
 export function resolveTrustedOrigins(env: Environment): string[] {
@@ -33,6 +37,6 @@ export function resolveTrustedOrigins(env: Environment): string[] {
     const value = normalizeAuthUrl(env[variable], variable)
     return value ? [new URL(value).origin] : []
   })
-  if (env.NODE_ENV === 'development') origins.push('http://localhost:3000')
+  if (env.NODE_ENV === 'development') origins.push('http://localhost:*', 'http://127.0.0.1:*')
   return [...new Set(origins)]
 }
