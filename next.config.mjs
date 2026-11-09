@@ -1,6 +1,18 @@
+const applicationRuntimeFiles = [
+  './node_modules/playwright/**/*',
+  './node_modules/playwright-core/**/*',
+  // Vercel installs using pnpm: include its real package paths as well as links.
+  './node_modules/.pnpm/playwright@*/node_modules/playwright/**/*',
+  './node_modules/.pnpm/playwright-core@*/node_modules/playwright-core/**/*',
+]
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['playwright', 'playwright-core'],
+  outputFileTracingIncludes: {
+    '/api/agent/run': applicationRuntimeFiles,
+    '/api/cron/autopilot': applicationRuntimeFiles,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

@@ -1,9 +1,10 @@
 'use client'
 
 import { Loader2, Sparkles } from 'lucide-react'
-import { useTransition } from 'react'
+import { useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { runAgent } from '@/app/actions/applications'
+import { requestAgentRun, type AgentRequestResult } from '@/lib/agent-request'
 import { Button } from '@/components/ui/button'
 
 export function RunAgentButton({
@@ -15,23 +16,38 @@ export function RunAgentButton({
   usedToday: number
   dailyLimit: number
 }) {
-  const [pending, startTransition] = useTransition()
+  const [pending, setPending] = useState(false)
+  const [result, setResult] = useState<AgentRequestResult | null>(null)
+  const running = useRef(false)
+  const router = useRouter()
+
+  async function run() {
+    if (running.current) return
+    running.current = true
+    setPending(true)
+    setResult(null)
+    try {
+      const response = await requestAgentRun()
+      setResult(response)
+      if (response.ok) {
+        toast.success(response.message)
+        router.refresh()
+      } else toast.error(response.message)
+    } finally {
+      running.current = false
+      setPending(false)
+    }
+  }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex max-w-xl flex-wrap items-center gap-3">
       <span className="text-xs text-muted-foreground">
         {usedToday}/{dailyLimit} today
       </span>
       <Button
         disabled={disabled || pending}
         className="h-11 gap-2 rounded-full px-6"
-        onClick={() =>
-          startTransition(async () => {
-            const result = await runAgent()
-            if (result.ok) toast.success(result.message)
-            else toast.error(result.message)
-          })
-        }
+        onClick={run}
       >
         {pending ? (
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -40,6 +56,9 @@ export function RunAgentButton({
         )}
         {pending ? 'Agent is finding and applying…' : 'Find & apply automatically'}
       </Button>
+      {result && <p role={result.ok ? 'status' : 'alert'} className={`w-full text-sm leading-6 ${result.ok ? 'text-muted-foreground' : 'text-destructive'}`}>
+        {result.message}{result.reference && <> Error reference: {result.reference}</>}
+      </p>}
     </div>
   )
 }

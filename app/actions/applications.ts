@@ -2,24 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { runAgentForUser } from '@/lib/agent'
 import { requireUserId } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { ApplicationStatus } from '@/lib/generated/prisma/enums'
 import type { FormState } from './profile'
-
-export async function runAgent() {
-  const userId = await requireUserId()
-  try {
-    const result = await runAgentForUser(userId)
-    revalidatePath('/dashboard', 'layout')
-    return { ok: true, message: result.message }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Agent run failed.'
-    console.error('[applot] agent run failed', error)
-    return { ok: false, message }
-  }
-}
 
 const statusSchema = z.enum(Object.values(ApplicationStatus) as [ApplicationStatus, ...ApplicationStatus[]])
 

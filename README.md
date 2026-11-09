@@ -97,6 +97,9 @@ Local development uses installed Chromium. For serverless hosting, configure
 `APPLICATION_BROWSER_WS_URL` with a trusted Chromium CDP browser service; local
 browser binaries are not included in the deployment. That provider handles CVs
 and profile information during applications. Keep its credentials server-side.
+Manual runs use `/api/agent/run` so failures are displayed inside the dashboard.
+Next.js file tracing explicitly includes Playwright runtime assets, including
+`playwright-core/browsers.json`, for that endpoint and scheduled autopilot runs.
 
 Validate without sending real applications:
 
