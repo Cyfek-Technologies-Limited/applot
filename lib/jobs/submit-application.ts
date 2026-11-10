@@ -3,6 +3,26 @@ import { chromium, type Browser, type Page } from 'playwright'
 import type { Profile } from '@/lib/generated/prisma/client'
 import { decryptResume } from '@/lib/resume-storage'
 import { answerFor } from './form-answers'
+import { applicationBrowserEndpoint } from '@/lib/application-browser-config'
+
+async function connectBrowser(): Promise<Browser> {
+  const endpoint = applicationBrowserEndpoint()
+  return endpoint ? chromium.connectOverCDP(endpoint, { timeout: 15000 }) : chromium.launch({ headless: true })
+}
+
+export async function checkApplicationBrowser(): Promise<void> {
+  // Validate separately so malformed settings get a useful configuration error.
+  applicationBrowserEndpoint()
+  let browser: Browser | undefined
+  try {
+    browser = await connectBrowser()
+    const context = await browser.newContext({ serviceWorkers: 'block' })
+    await context.newPage()
+    await context.close()
+  } catch {
+    throw Object.assign(new Error('The application browser service could not connect. Check the browser endpoint and credentials. No applications were attempted.'), { code: 'APPLICATION_BROWSER_UNAVAILABLE' })
+  } finally { await browser?.close().catch(() => undefined) }
+}
 
 export type SubmissionResult = {
   status: 'SUBMITTED' | 'NEEDS_INPUT' | 'HUMAN_REQUIRED' | 'UNSUPPORTED' | 'FAILED' | 'UNKNOWN'
@@ -138,9 +158,7 @@ export async function submitApplication(url: string, profile: Profile, letter: s
   if (!profile.resumeData) return { status: 'NEEDS_INPUT', message: 'Upload your CV again so the agent can attach the original file.', questions: ['Upload your original CV'] }
   let browser: Browser | undefined
   try {
-    browser = process.env.APPLICATION_BROWSER_WS_URL
-      ? await chromium.connectOverCDP(process.env.APPLICATION_BROWSER_WS_URL, { timeout: 15000 })
-      : await chromium.launch({ headless: true })
+    browser = await connectBrowser()
     const context = await browser.newContext({ acceptDownloads: false, serviceWorkers: 'block' })
     const page = await context.newPage()
     page.setDefaultTimeout(5000)
@@ -164,6 +182,6 @@ export async function submitApplication(url: string, profile: Profile, letter: s
       await context.close().catch(() => undefined)
     }
   } catch {
-    return { status: 'FAILED', message: 'The application browser could not prepare this form. Check the browser service configuration; no submission was confirmed.' }
+    return { status: 'FAILED', message: 'The browser could not prepare this employer form. No application was submitted.' }
   } finally { await browser?.close().catch(() => undefined) }
 }

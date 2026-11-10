@@ -1,5 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@/lib/generated/prisma/client'
+import { databaseUrl } from './database-url'
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
@@ -10,7 +11,7 @@ function createClient() {
       'DATABASE_URL is missing. Set a PostgreSQL connection string in .env.local (see .env.example), initialize the database, and restart Next.js.',
     )
   }
-  const adapter = new PrismaPg({ connectionString })
+  const adapter = new PrismaPg({ connectionString: databaseUrl(connectionString) })
   return new PrismaClient({ adapter })
 }
 

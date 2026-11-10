@@ -32,6 +32,17 @@ test('database failures during authentication return a recoverable JSON response
   const response = await handleAgentRequest(request(), async () => ({ getSession: async () => { throw Object.assign(new Error('unavailable'), { code: 'P1001' }) }, run: async () => ({ message: '' }) }))
   assert.equal(response.status, 503)
 })
+
+test('browser setup and connectivity failures return useful errors without secrets', async () => {
+  for (const code of ['APPLICATION_BROWSER_CONFIG', 'APPLICATION_BROWSER_UNAVAILABLE']) {
+    const response = await handleAgentRequest(request(), async () => ({ getSession: async () => ({ user: { id: 'fixture-user' } }), run: async () => { throw Object.assign(new Error('secret-token'), { code }) } }))
+    assert.equal(response.status, 503)
+    const result = await response.json()
+    assert.equal(result.ok, false)
+    assert.match(result.message, /No applications were attempted/)
+    assert.equal(result.message.includes('secret-token'), false)
+  }
+})
 test('successful authenticated requests run only for the session user', async () => {
   let user
   const response = await handleAgentRequest(request(), async () => ({ getSession: async () => ({ user: { id: 'fixture-user' } }), run: async id => { user = id; return { message: 'Completed' } } }))

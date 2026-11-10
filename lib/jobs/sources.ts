@@ -36,10 +36,13 @@ function stripHtml(html: string) {
 
 async function getJson<T>(url: string): Promise<T | null> {
   try {
+    const host = new URL(url).hostname
+    // Full-board responses routinely exceed Next's 2 MB cache entry limit.
+    const largeFeed = host === 'www.arbeitnow.com' || host === 'boards-api.greenhouse.io'
     const res = await fetch(url, {
       headers: { 'User-Agent': UA, Accept: 'application/json' },
       signal: AbortSignal.timeout(12000),
-      next: { revalidate: new URL(url).hostname === 'himalayas.app' ? 86400 : new URL(url).hostname === 'remotive.com' ? 21600 : 3600 },
+      ...(largeFeed ? { cache: 'no-store' as const } : { next: { revalidate: host === 'himalayas.app' ? 86400 : host === 'remotive.com' ? 21600 : 3600 } }),
     })
     if (!res.ok) return null
     return (await res.json()) as T

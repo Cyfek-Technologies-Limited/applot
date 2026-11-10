@@ -28,6 +28,8 @@ export async function handleAgentRequest(request: Request, load: () => Promise<D
     if (profileErrors.has(message)) return json({ ok: false, message }, 422)
     if (message === 'Your agent is already running. Please wait for it to finish.') return json({ ok: false, message }, 409)
     const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : undefined
+    if (code === 'APPLICATION_BROWSER_CONFIG') return json({ ok: false, message: 'Automatic applications are blocked by browser setup. APPLICATION_BROWSER_WS_URL must contain the complete browser connection URL, not just an API key. No applications were attempted.' }, 503)
+    if (code === 'APPLICATION_BROWSER_UNAVAILABLE') return json({ ok: false, message: 'The application browser could not connect. Check its connection URL, credentials, and service availability. No applications were attempted.' }, 503)
     const databaseFailure = ['P1001', 'P1002', 'P1017', 'ECONNREFUSED', 'ETIMEDOUT'].includes(code ?? '')
     // Avoid logging Prisma messages that can include CV text or application data.
     console.error('[applot] agent request failed', {

@@ -27,6 +27,34 @@ const { canonicalJobUrl } = load('lib/jobs/identity.ts')
 const candidate = { location: 'Lagos, Nigeria', preferredLocations: [], remoteOnly: true }
 const job = (location, remote = true) => ({ location, remote })
 
+test('browser configuration rejects bare tokens without exposing credentials', () => {
+  const { applicationBrowserEndpoint } = load('lib/application-browser-config.ts')
+  assert.equal(applicationBrowserEndpoint({}), undefined)
+  for (const value of ['a-private-api-token', 'file:///secret', 'https://user:secret@browser.example', 'wss://browser.example/#secret']) {
+    assert.throws(() => applicationBrowserEndpoint({ APPLICATION_BROWSER_WS_URL: value }), error => error.code === 'APPLICATION_BROWSER_CONFIG' && !error.message.includes(value))
+  }
+  assert.throws(() => applicationBrowserEndpoint({ VERCEL: '1' }), error => error.code === 'APPLICATION_BROWSER_CONFIG')
+  assert.equal(applicationBrowserEndpoint({ APPLICATION_BROWSER_WS_URL: ' wss://browser.example/chromium?token=fixture ' }), 'wss://browser.example/chromium?token=fixture')
+})
+
+test('database SSL aliases preserve verified TLS and connection credentials', () => {
+  const { databaseUrl } = load('lib/database-url.ts')
+  const { parse } = require('pg-connection-string')
+  for (const mode of ['prefer', 'require', 'verify-ca']) {
+    const normalized = databaseUrl(`postgresql://user:p%40ss%26word@db.example/app?sslmode=${mode}&channel_binding=require`)
+    const parsed = parse(normalized)
+    assert.equal(parsed.sslmode, 'verify-full')
+    assert.equal(parsed.password, 'p@ss&word')
+    assert.equal(parsed.channel_binding, 'require')
+    assert.notEqual(parsed.ssl.rejectUnauthorized, false)
+    assert.equal(parsed.ssl.checkServerIdentity, undefined)
+  }
+  for (const suffix of ['', '?sslmode=disable', '?sslmode=verify-full', '?sslmode=require&uselibpqcompat=true']) {
+    const value = `postgresql://user:pass@localhost/app${suffix}`
+    assert.equal(databaseUrl(value), value)
+  }
+})
+
 test('job URL de-duplication preserves real job identifiers', () => {
   assert.notEqual(canonicalJobUrl('https://example.com/careers?gh_jid=123'), canonicalJobUrl('https://example.com/careers?gh_jid=456'))
   assert.equal(canonicalJobUrl('https://jobs.lever.co/company/id/apply?utm_source=feed'), canonicalJobUrl('https://jobs.lever.co/company/id'))
@@ -62,13 +90,21 @@ test('source isolation and interleaving retain several providers when one feed f
   const exports = {}
   const source = ts.transpileModule(fs.readFileSync('lib/jobs/sources.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
   const extra = { externalId: 'ats-1', source: 'ATS fixture', title: 'Frontend Developer', company: 'Direct employer', location: 'Worldwide', remote: true, url: 'https://jobs.ashbyhq.com/test/job', tags: [], description: '', salary: '' }
-  const fetch = async url => ({ ok: true, json: async () => {
+  const fetch = async (url, options) => {
+    if (url.includes('arbeitnow') || url.includes('boards-api.greenhouse.io')) {
+      assert.equal(options.cache, 'no-store')
+      assert.equal(options.next, undefined)
+    } else assert.ok(options.next.revalidate > 0)
+    return { ok: true, json: async () => {
     if (url.includes('remotive')) return { jobs: [1, 2, 3].map(id => ({ id, title: 'Frontend Developer', company_name: `Remotive fixture ${id}`, candidate_required_location: 'Worldwide', url: `https://remotive.com/job/${id}`, tags: [], description: '' })) }
     if (url.includes('jobicy')) return { jobs: [{ id: 1, jobTitle: 'Frontend Developer', companyName: 'Jobicy fixture', jobGeo: 'Worldwide', url: 'https://jobicy.com/job/1' }] }
     if (url.includes('remoteok')) return [{ id: '1', position: 'Frontend Developer', company: 'RemoteOK fixture', location: 'United States', url: 'https://remoteok.com/job/1' }]
     return { data: [{ title: 'Broken schema', tags: null }] }
-  } })
-  const dependencies = { 'server-only': {}, './identity': { canonicalJobUrl }, './location': { matchesLocation }, './additional-sources': { additionalSources: async () => [{ source: 'ATS fixture', jobs: [extra] }] } }
+  } } }
+  const dependencies = { 'server-only': {}, './identity': { canonicalJobUrl }, './location': { matchesLocation }, './additional-sources': { additionalSources: async (_query, _location, get) => {
+    await get('https://boards-api.greenhouse.io/v1/boards/fixture/jobs?content=true')
+    return [{ source: 'ATS fixture', jobs: [extra] }]
+  } } }
   vm.runInNewContext(source, { exports, fetch, URL, URLSearchParams, AbortSignal, console: { error: () => {} }, require: name => dependencies[name] })
   const jobs = await exports.searchJobs(['Frontend Developer'], candidate)
   assert.equal(jobs.length, 5)
@@ -136,7 +172,7 @@ test('listing handoff follows one supported apply link and rejects ambiguous or 
 })
 
 test('agent confirms applied status and does not retry uncertain submissions', async () => {
-  for (const status of ['SUBMITTED', 'UNKNOWN']) {
+  for (const status of ['SUBMITTED', 'UNKNOWN', 'BROWSER_DOWN']) {
     const rows = []
     let calls = 0
     let leased = false
@@ -162,11 +198,18 @@ test('agent confirms applied status and does not retry uncertain submissions', a
       '@/lib/jobs/sources': { searchJobs: async () => ['one', 'two'].map(id => ({ externalId: `fixture-${id}`, source: 'Fixture', title: 'Frontend Developer', company: 'Test employer', location: 'Worldwide', remote: true, tags: ['React'], description: 'Frontend development', url: `https://jobs.lever.co/example/${id}`, salary: '' })) },
       '@/lib/jobs/location': { matchesLocation },
       '@/lib/jobs/identity': { canonicalJobUrl },
-      '@/lib/jobs/submit-application': { supportedApplicationUrl: () => true, submitApplication: async () => { calls++; return { status, message: 'fixture' } } },
+      '@/lib/jobs/submit-application': { checkApplicationBrowser: async () => { if (status === 'BROWSER_DOWN') throw new Error('browser unavailable') }, supportedApplicationUrl: () => true, submitApplication: async () => { calls++; return { status, message: 'fixture' } } },
       ai: { generateText: async () => { throw new Error('fixture fallback') }, Output: { object: () => ({}) } },
     }
     const source = ts.transpileModule(fs.readFileSync('lib/agent.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
-    vm.runInNewContext(source, { exports, crypto: require('node:crypto'), Date, Set, console: { error: () => {} }, require: name => dependencies[name] ?? require(name) })
+    vm.runInNewContext(source, { exports, crypto: require('node:crypto'), Date, Set, console: { error: () => {}, warn: () => {} }, require: name => dependencies[name] ?? require(name) })
+    if (status === 'BROWSER_DOWN') {
+      await assert.rejects(exports.runAgentForUser('test-user'), /browser unavailable/)
+      assert.equal(rows.length, 0)
+      assert.equal(calls, 0)
+      assert.equal(leased, false)
+      continue
+    }
     await exports.runAgentForUser('test-user')
     assert.equal(rows.length, 1)
     assert.equal(rows[0].submissionStatus, status)

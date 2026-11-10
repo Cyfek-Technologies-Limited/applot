@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import type { Profile } from '@/lib/generated/prisma/client'
 import { searchJobs, type JobListing } from '@/lib/jobs/sources'
-import { submitApplication, supportedApplicationUrl } from '@/lib/jobs/submit-application'
+import { checkApplicationBrowser, submitApplication, supportedApplicationUrl } from '@/lib/jobs/submit-application'
 import { matchesLocation } from '@/lib/jobs/location'
 import { canonicalJobUrl } from '@/lib/jobs/identity'
 
@@ -75,7 +75,13 @@ async function scoreJobs(jobs: JobListing[], profile: Profile) {
         : { job, ...keywordScore(job, profile) }
     })
   } catch (error) {
-    console.error('[applot] AI scoring failed, using keyword scoring', error instanceof Error ? error.name : 'RequestError')
+    // Log support identifiers, never prompts, CVs, credentials, or response bodies.
+    const details = error as { name?: unknown; statusCode?: unknown; generationId?: unknown }
+    console.warn('[applot] AI scoring unavailable after retry; using keyword scoring', {
+      name: typeof details?.name === 'string' ? details.name : 'RequestError',
+      statusCode: typeof details?.statusCode === 'number' ? details.statusCode : undefined,
+      generationId: typeof details?.generationId === 'string' ? details.generationId : undefined,
+    })
     return fallback()
   }
 }
@@ -134,6 +140,15 @@ async function runLockedAgent(userId: string) {
   if (!profile.location.trim()) throw new Error('Add your current location so the agent can check hiring eligibility.')
   if (!profile.resumeData) throw new Error('Upload your CV again to enable automatic submission with the original attachment.')
   if (!profile.fullName.trim() || !profile.email.trim()) throw new Error('Save your full name and email in your profile first.')
+
+  // A shared browser outage must stop the run, not fail every job and consume
+  // the candidate's daily allowance. This check sends no candidate data.
+  await checkApplicationBrowser()
+
+  await prisma.application.updateMany({ where: {
+    userId, archivedAt: null, status: 'PREPARED', submissionStatus: 'FAILED',
+    submissionMessage: 'The application browser could not prepare this form. Check the browser service configuration; no submission was confirmed.',
+  }, data: { submissionStatus: 'RETRY', submissionMessage: 'Browser connectivity restored. Queued for a new attempt.' } })
 
   // A process interrupted during submission may already have sent it. Never retry blindly.
   await prisma.application.updateMany({ where: { userId, submissionStatus: 'SUBMITTING' }, data: { submissionStatus: 'UNKNOWN', submissionMessage: 'The previous run was interrupted. Check for an employer confirmation before trying again.' } })
